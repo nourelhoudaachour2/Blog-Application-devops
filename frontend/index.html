@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Blog App</title>
+  <style>
+    body { font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; }
+    input, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+    button { padding: 8px 16px; background: #007bff; color: white; border: none; cursor: pointer; }
+    button.del { background: #dc3545; }
+    .article { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>📝 Blog App</h1>
+  <input id="title" placeholder="Titre de l'article" />
+  <textarea id="content" placeholder="Contenu..." rows="3"></textarea>
+  <button onclick="addArticle()">Ajouter</button>
+  <hr>
+  <div id="articles"></div>
+  <script>
+    const API = 'http://localhost:3001';
+    async function load() {
+      const res = await fetch(API + '/articles');
+      const articles = await res.json();
+      document.getElementById('articles').innerHTML = articles.map(a =>
+        `<div class="article">
+          <h3>${a.title}</h3>
+          <p>${a.content}</p>
+          <button class="del" onclick="del(${a.id})">Supprimer</button>
+        </div>`
+      ).join('');
+    }
+    async function addArticle() {
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      await fetch(API + '/articles', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title, content})
+      });
+      load();
+    }
+    async function del(id) {
+      await fetch(API + '/articles/' + id, {method: 'DELETE'});
+      load();
+    }
+    load();
+  </script>
+</body>
+</html>
